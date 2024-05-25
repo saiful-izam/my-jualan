@@ -1,6 +1,10 @@
-package env
+package config
 
-import "os"
+import (
+	"os"
+
+	"github.com/joho/godotenv"
+)
 
 type Environment struct {
 	User       string
@@ -10,7 +14,14 @@ type Environment struct {
 	ServerPort string
 }
 
-func GetEnvironment() *Environment {
+func SetupEnvironment() (*Environment, error) {
+
+	err := godotenv.Load()
+
+	if err != nil {
+		return nil, err
+	}
+
 	user := os.Getenv("DB_USER")
 	pass := os.Getenv("DB_PASSWORD")
 	host := os.Getenv("DB_HOST")
@@ -23,5 +34,6 @@ func GetEnvironment() *Environment {
 		Host:       host,
 		DbName:     dbName,
 		ServerPort: port,
-	}
+	}, nil
+
 }
