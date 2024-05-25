@@ -7,7 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/saiful-izam/my-jualan/auth-api/config"
 	"github.com/saiful-izam/my-jualan/auth-api/controller"
+	"github.com/saiful-izam/my-jualan/auth-api/dao"
 	"github.com/saiful-izam/my-jualan/auth-api/router"
+	"github.com/saiful-izam/my-jualan/auth-api/service"
 )
 
 func main() {
@@ -22,7 +24,16 @@ func main() {
 		slog.Error("Error while setup environment : ", err)
 	}
 
-	authController := controller.NewAuthControllerImpl()
+	db, err := config.SetupDatabase(env)
+
+	if err != nil {
+		slog.Error("Error while setup Database Connecton : ", err)
+	}
+
+	// initiliaze dependency injection
+	userRepo := dao.NewUserRepositoryImpl(db)
+	userSvc := service.NewUserServiceImpl(userRepo)
+	authController := controller.NewAuthControllerImpl(userSvc)
 
 	r := gin.Default()
 	router := router.NewAuthRouter(authController, r)

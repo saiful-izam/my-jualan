@@ -1,7 +1,10 @@
 package controller
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
+	"github.com/saiful-izam/my-jualan/auth-api/dto"
 	"github.com/saiful-izam/my-jualan/auth-api/service"
 )
 
@@ -27,5 +30,11 @@ func (auth *AuthControllerImpl) Login(c *gin.Context) {
 }
 
 func (auth *AuthControllerImpl) Register(c *gin.Context) {
+	var request dto.RegisterDTO
 
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid Request body",
+		})
+	}
 }
