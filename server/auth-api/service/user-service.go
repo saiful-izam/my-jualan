@@ -4,11 +4,14 @@ import (
 	"log/slog"
 
 	"github.com/saiful-izam/my-jualan/auth-api/dao"
+	"github.com/saiful-izam/my-jualan/auth-api/dto"
 	"github.com/saiful-izam/my-jualan/auth-api/model"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService interface {
 	GetUser(id uint64) (model.User, error)
+	Login(req dto.LoginDTO) (dto.SessionDTO, error)
 	SaveUser(user *model.User) error
 }
 
@@ -42,4 +45,28 @@ func (svc *UserServiceImpl) SaveUser(user *model.User) error {
 	}
 
 	return nil
+}
+
+func (svc *UserServiceImpl) Login(req dto.LoginDTO) (dto.SessionDTO, error) {
+	var session dto.SessionDTO
+	user, err := svc.UserRepository.FindUserByEmail(req.Email)
+
+	if err != nil {
+		slog.Error("error while fetching user in DB : ", err)
+		return dto.SessionDTO{}, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
+
+	if err != nil {
+		slog.Error("Password are not matched for user : ", "email", user.Email)
+
+		return dto.SessionDTO{}, err
+	}
+
+	session = dto.SessionDTO{
+		Token:        "token123",
+		RefreshToken: "refreshtoken1234",
+	}
+	return session, nil
 }

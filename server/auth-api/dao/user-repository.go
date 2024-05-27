@@ -7,6 +7,7 @@ import (
 
 type UserRepository interface {
 	FindUserById(id uint64) (model.User, error)
+	FindUserByEmail(email string) (model.User, error)
 	Save(u *model.User) error
 }
 
@@ -35,11 +36,23 @@ func (u *UserRepositoryImpl) FindUserById(id uint64) (model.User, error) {
 }
 
 func (u *UserRepositoryImpl) Save(user *model.User) error {
-	result := u.DB.Save(&user)
+	result := u.DB.Create(&user)
 
 	if result.Error != nil {
 		return result.Error
 	}
 
 	return nil
+}
+
+func (u *UserRepositoryImpl) FindUserByUsername(email string) (model.User, error) {
+	var user model.User
+
+	result := u.DB.Where("email = ? ", email, &user)
+
+	if result.Error != nil || result.RowsAffected < 1 {
+		return model.User{}, result.Error
+	}
+
+	return user, nil
 }
