@@ -45,12 +45,12 @@ func (u *UserRepositoryImpl) Save(user *model.User) error {
 	return nil
 }
 
-func (u *UserRepositoryImpl) FindUserByUsername(email string) (model.User, error) {
+func (u *UserRepositoryImpl) FindUserByEmail(email string) (model.User, error) {
 	var user model.User
 
-	result := u.DB.Where("email = ? ", email, &user)
+	result := u.DB.Where("email = ? ", email).Find(&user)
 
-	if result.Error != nil || result.RowsAffected < 1 {
+	if result.Error != nil {
 		return model.User{}, result.Error
 	}
 

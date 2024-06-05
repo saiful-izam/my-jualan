@@ -33,7 +33,15 @@ func (auth *AuthControllerImpl) Login(c *gin.Context) {
 
 	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
 		errorResponse = dto.ErrorDto{
-			Error: common.INVALID_REQUEST_BODY,
+			Error: common.InvalidRequestBody,
+		}
+	}
+
+	result, err := auth.UserService.Login(request)
+
+	if err != nil {
+		errorResponse = dto.ErrorDto{
+			Error: common.InvalidUsernamePassword,
 		}
 	}
 
@@ -41,6 +49,8 @@ func (auth *AuthControllerImpl) Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorResponse)
 		return
 	}
+
+	c.JSON(http.StatusOK, result)
 }
 
 func (auth *AuthControllerImpl) Register(c *gin.Context) {
